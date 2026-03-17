@@ -6,13 +6,15 @@ export interface userType {
     email : string
 }
 
+export type userFormType = Omit<userType, 'id'> & { id?: number }
+
 export interface UserContextType  {
     usersData : userType[]
     addUser : (user : userType)=> void;
-    updateUser : (id: number, user: Partial<userType>)=> void;
+    updateUser : (formValues: userFormType)=> void;
     deleteUser : (id: number)=> void;
-    userFormInputFieldValue : Omit<userType, 'id'>,
-    setUserFormInputFieldValue : (value: Omit<userType, 'id'> | ((prev: Omit<userType, 'id'>) => Omit<userType, 'id'>))=> void,
+    userFormInputFieldValue : userFormType,
+    setUserFormInputFieldValue : (value: userFormType | ((prev: userFormType) => userFormType))=> void,
     isEdit : boolean,
     setIsEdit : (val:boolean)=> void
 }

@@ -1,17 +1,17 @@
-import type { UserContextType, userType } from "@/Types/types"
+import type { UserContextType, userFormType, userType } from "@/Types/types"
 import UserContext from "./context"
 import { useEffect, useState } from "react"
 import axios from "axios"
 
 const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [usersData, setUsersData] = useState<userType[]>([])
-  const [userFormInputFieldValue, setUserFormInputFieldValue] = useState<Omit<userType, 'id'>>({ name: "", city: "", age: "", email: "" });
+  const [userFormInputFieldValue, setUserFormInputFieldValue] = useState<userFormType>({ name: "", city: "", age: "", email: "" });
   const [isEdit, setIsEdit] =  useState(false)
   const fetchData = async () => {
     const response = await axios.get(
       "https://69b8eb3de69653ffe6a5e035.mockapi.io/users"
     )
-    setUsersData(response.data)
+    setUsersData(response.data  )
   }
 
   useEffect(()=>{
@@ -26,12 +26,12 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
     fetchData()
     console.log('response after add', response)
   }
-  const updateUser = (userFormInputFieldValue) => {
-    console.log(usersData[0].id)
-    if(isEdit){
-    axios.put(`https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${+usersData.id}`, userFormInputFieldValue)
-      .then(() => fetchData())
-      .catch(err => console.error('Error updating user:', err))
+  const updateUser = (formValues: userFormType) => {
+    if(isEdit && formValues.id){
+      const { id, ...data } = formValues
+      axios.put(`https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${id}`, data)
+        .then(() => fetchData())
+        .catch(err => console.error('Error updating user:', err))
     }
     setIsEdit(false);
   }
