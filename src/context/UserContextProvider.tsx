@@ -5,17 +5,21 @@ import axios from "axios"
 
 const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [usersData, setUsersData] = useState<userType[]>([])
-  const [userFormInputFieldValue, setUserFormInputFieldValue] =useState<userFormType>({ name: "", city: "", age: "", email: "" })
+  const [userFormInputFieldValue, setUserFormInputFieldValue] = useState<userFormType>({ name: "", city: "", age: "", email: "" })
   const [isEdit, setIsEdit] = useState(false)
   const [noOfRows, setNoOfRows] = useState(10)
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios?.get(
-        "https://69b8eb3de69653ffe6a5e035.mockapi.io/users"
-      )
-      setUsersData(response.data)
+      try {
+        const response = await axios?.get(
+          "https://69b8eb3de69653ffe6a5e035.mockapi.io/users"
+        )
+        setUsersData(response.data)
+      } catch (error) {
+        console.error("Error while fetching the data", error)
+      }
     }
     fetchData()
   }, [])
