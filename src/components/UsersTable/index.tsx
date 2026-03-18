@@ -8,19 +8,22 @@ import {
 } from "@/components/ui/table"
 
 import { Button } from "@/components/ui/button"
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog"
-import { FormDialog } from "@/components/FormDialog"
-import { useContext, useState } from "react"
+import { ConfirmDeleteDialog } from "@/components/Confirm_Delete_Dialog"
+import { FormDialog } from "@/components/Form"
+import { useContext, useEffect, useState } from "react"
 import UserContext from "@/context/context"
 import type { userType } from "@/Types/types"
-import { Pencil, Plus, Trash2 } from "lucide-react"
-
-function UsersTable() {
+import { Plus } from "lucide-react"
+import { TABLE_HEADINGS } from "@/constants/table_headings"
+import { Input } from "../ui/input"
+const UsersTable = () => {
   const {
     usersData,
     deleteUser,
     setIsEdit,
     setUserFormInputFieldValue,
+    currentPage,
+    noOfRows,
   } = useContext(UserContext)
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -50,7 +53,7 @@ function UsersTable() {
     setDeleteDialogOpen(true)
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (userToDelete !== null) {
       deleteUser(userToDelete)
     }
@@ -58,11 +61,24 @@ function UsersTable() {
     setUserToDelete(null)
   }
 
+  const handleSearchChange = () => {
+    // pending.......
+  }
+  const start = (currentPage - 1) * noOfRows
+  const end = start + noOfRows
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">Users</h2>
-        <Button onClick={handleAddClick}>
+      <div className="mb-5 flex justify-between">
+        <h2 className="text-xl font-semibold">User Details</h2>
+        <Input
+          placeholder="Search..."
+          className="max-w-sm"
+          onChange={handleSearchChange}
+        />
+        <Button
+          onClick={handleAddClick}
+          className="bg-blue-500 text-white hover:bg-blue-600"
+        >
           <Plus />
           Add User
         </Button>
@@ -72,50 +88,45 @@ function UsersTable() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              {TABLE_HEADINGS?.map((heading) => (
+                <TableHead key={heading} className="text-[16px] font-bold">
+                  {heading}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {usersData.length === 0 ? (
+            {usersData?.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="py-10 text-center text-muted-foreground"
-                >
+                <TableCell colSpan={6} className="py-10 text-center">
                   No users found.
                 </TableCell>
               </TableRow>
             ) : (
-              usersData.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.id}</TableCell>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.city}</TableCell>
-                  <TableCell>{user.age}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+              usersData?.slice(start, end).map((user) => (
+                <TableRow key={user?.id}>
+                  <TableCell className="font-medium">{user?.id}</TableCell>
+                  <TableCell>{user?.name}</TableCell>
+                  <TableCell>{user?.city}</TableCell>
+                  <TableCell>{user?.age}</TableCell>
+                  <TableCell>{user?.email}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-6">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(user)}
                       >
-                        <Pencil />
                         Edit
                       </Button>
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDeleteClick(user.id)}
+                        onClick={() => handleDeleteClick(user?.id)}
                       >
-                        <Trash2 />
-                        Delete
+                        {" "}
+                        Delete{" "}
                       </Button>
                     </div>
                   </TableCell>
@@ -127,8 +138,7 @@ function UsersTable() {
       </div>
 
       <FormDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} />
-
-      <DeleteConfirmDialog
+      <ConfirmDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}

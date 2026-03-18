@@ -1,8 +1,6 @@
-import { TriangleAlertIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -10,34 +8,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-interface DeleteConfirmDialogProps {
+interface ConfirmDeleteDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }
 
-export function DeleteConfirmDialog({
+export function ConfirmDeleteDialog({
   open,
   onOpenChange,
   onConfirm,
-}: DeleteConfirmDialogProps) {
+}: ConfirmDeleteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-gray-300">
         <DialogHeader>
-          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-destructive/10">
-            <TriangleAlertIcon className="size-6 text-destructive" />
-          </div>
           <DialogTitle className="text-center">Delete User</DialogTitle>
           <DialogDescription className="text-center">
-            Are you sure you want to delete this user? This action cannot be
-            undone.
+            Are you sure you want to delete this user?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-center">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
           <Button variant="destructive" onClick={onConfirm}>
             Delete
           </Button>

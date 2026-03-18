@@ -114,7 +114,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
               orientation="horizontal"
               className="sm:col-span-2 justify-end"
             >
-              <Button type="submit" size="lg">
+              <Button type="submit" size="lg" className="">
                 {isEdit ? "Update User" : "Add User"}
               </Button>
             </Field>

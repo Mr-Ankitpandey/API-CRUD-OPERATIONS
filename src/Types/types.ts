@@ -1,5 +1,5 @@
 export interface userType {
-    id: number
+    id?: number
     name: string,
     age : string,
     city : string,

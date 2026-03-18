@@ -5,41 +5,78 @@ import axios from "axios"
 
 const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [usersData, setUsersData] = useState<userType[]>([])
-  const [userFormInputFieldValue, setUserFormInputFieldValue] = useState<userFormType>({ name: "", city: "", age: "", email: "" });
-  const [isEdit, setIsEdit] =  useState(false)
-  const fetchData = async () => {
-    const response = await axios.get(
-      "https://69b8eb3de69653ffe6a5e035.mockapi.io/users"
-    )
-    setUsersData(response.data  )
-  }
+  const [userFormInputFieldValue, setUserFormInputFieldValue] =useState<userFormType>({ name: "", city: "", age: "", email: "" })
+  const [isEdit, setIsEdit] = useState(false)
+  const [noOfRows, setNoOfRows] = useState(10)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  useEffect(()=>{
-      fetchData()
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axios?.get(
+        "https://69b8eb3de69653ffe6a5e035.mockapi.io/users"
+      )
+      setUsersData(response.data)
+    }
+    fetchData()
   }, [])
 
   const addUser = async (user: userType) => {
-    const response = await axios.post(
-      "https://69b8eb3de69653ffe6a5e035.mockapi.io/users",
-      user
-    )
-    fetchData()
-    console.log('response after add', response)
-  }
-  const updateUser = (formValues: userFormType) => {
-    if(isEdit && formValues.id){
-      const { id, ...data } = formValues
-      axios.put(`https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${id}`, data)
-        .then(() => fetchData())
-        .catch(err => console.error('Error updating user:', err))
+    try {
+      const response = await axios.post(
+        "https://69b8eb3de69653ffe6a5e035.mockapi.io/users",
+        user
+      )
+      if (response.status === 201) {
+        setUsersData((prev) => {
+          return [...prev, response?.data]
+        })
+      }
+    } catch (error) {
+      console.error("Error while adding the user", error)
     }
-    setIsEdit(false);
   }
 
-  const deleteUser = (id: number) => {
-    axios.delete(`https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${id}`)
-      .then(() => fetchData())
-      .catch(err => console.error('Error deleting user:', err))
+  const updateUser = async (formValues: userFormType) => {
+    if (isEdit && formValues.id) {
+      const { id, ...data } = formValues
+      try {
+        const response = await axios?.put(
+          `https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${id}`,
+          data
+        )
+        if (response.status === 200) {
+          setUsersData((prev) => {
+            const userIdToUpdate = prev?.find((user) => user.id === id)
+            const updatedUser = prev.map((user) =>
+              user.id === userIdToUpdate?.id ? { ...user, ...data } : user
+            )
+            return updatedUser
+          })
+        }
+      } catch (error) {
+        console.error("Error while updating the user...", error)
+      }
+    }
+    setIsEdit(false)
+  }
+
+  const deleteUser = async (id: number) => {
+    try {
+      const response = await axios.delete(
+        `https://69b8eb3de69653ffe6a5e035.mockapi.io/users/${id}`
+      )
+      if (response.status === 200) {
+        setUsersData((prev) => {
+          const updated = prev?.filter((user) => user.id !== id)
+          if (updated?.length > 0 && updated?.length % noOfRows === 0) {
+            setCurrentPage((p) => p - 1)
+          }
+          return updated
+        })
+      }
+    } catch (error) {
+      console.error("Error while deleting the user..", error)
+    }
   }
 
   const ctxValue: UserContextType = {
@@ -50,7 +87,11 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
     isEdit,
     setIsEdit,
     userFormInputFieldValue,
-    setUserFormInputFieldValue
+    setUserFormInputFieldValue,
+    noOfRows,
+    setNoOfRows,
+    currentPage,
+    setCurrentPage,
   }
 
   return (
