@@ -102,7 +102,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                type="email"
+                type="text"
                 placeholder="Enter email"
                 name="email"
                 value={userFormInputFieldValue?.email || ""}

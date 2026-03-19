@@ -16,6 +16,9 @@ import type { userType } from "@/Types/types"
 import { Plus } from "lucide-react"
 import { TABLE_HEADINGS } from "@/constants/table_headings"
 import { Input } from "../ui/input"
+import { Loader } from "../Loader"
+import { Toast } from "../Toast/index"
+
 const UsersTable = () => {
   const {
     usersData,
@@ -24,17 +27,25 @@ const UsersTable = () => {
     setUserFormInputFieldValue,
     currentPage,
     noOfRows,
+    isOperationRunning,
+    setCurrentPage,
+    isSomeData,
+    setIsSomeData
   } = useContext(UserContext)
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  
 
   const handleAddClick = () => {
     setIsEdit(false)
     setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
     setFormDialogOpen(true)
   }
+ 
 
   const handleEdit = (user: userType) => {
     setIsEdit(true)
@@ -55,14 +66,16 @@ const UsersTable = () => {
 
   const handleDeleteConfirm = async () => {
     if (userToDelete !== null) {
-      deleteUser(userToDelete)
+      await deleteUser(userToDelete)
     }
     setDeleteDialogOpen(false)
     setUserToDelete(null)
   }
 
-  const handleSearchChange = () => {
-    // pending.......
+  const handleSearchChange = (e) => {
+    setIsSomeData(false)
+    setSearchQuery(e.target.value)
+    setCurrentPage(1)
   }
   const start = (currentPage - 1) * noOfRows
   const end = start + noOfRows
@@ -83,59 +96,85 @@ const UsersTable = () => {
           Add User
         </Button>
       </div>
-
-      <div className="overflow-hidden rounded-lg border border-border">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50 hover:bg-muted/50">
-              {TABLE_HEADINGS?.map((heading) => (
-                <TableHead key={heading} className="text-[16px] font-bold">
-                  {heading}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {usersData?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center">
-                  No users found.
-                </TableCell>
+      {isOperationRunning && <Toast/> }
+      {!usersData?.length ? (
+        <Loader text="Loading..." />
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                {TABLE_HEADINGS?.map((heading) => (
+                  <TableHead key={heading} className="text-[16px] font-bold">
+                    {heading}
+                  </TableHead>
+                ))}
               </TableRow>
-            ) : (
-              usersData?.slice(start, end).map((user) => (
-                <TableRow key={user?.id}>
-                  <TableCell className="font-medium">{user?.id}</TableCell>
-                  <TableCell>{user?.name}</TableCell>
-                  <TableCell>{user?.city}</TableCell>
-                  <TableCell>{user?.age}</TableCell>
-                  <TableCell>{user?.email}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-6">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteClick(user?.id)}
-                      >
-                        {" "}
-                        Delete{" "}
-                      </Button>
-                    </div>
+            </TableHeader>
+
+            <TableBody>
+              {usersData?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center">
+                    No users found.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                usersData
+                  ?.filter(
+                    (user) =>
+                     {
+                      if( user.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                      user.city
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())){
+                          setIsSomeData(true)
+                          return user
+                        }
+                     }
+                  )
+                  .slice(start, end)
+                  .map((user) => (
+                    <TableRow key={user?.id}>
+                      <TableCell className="font-medium">{user?.id}</TableCell>
+                      <TableCell>{user?.name}</TableCell>
+                      <TableCell>{user?.city}</TableCell>
+                      <TableCell>{user?.age}</TableCell>
+                      <TableCell>{user?.email}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(user)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteClick(user?.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )) 
+              )}
+
+               {!isSomeData &&  <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center text-2xl">
+                    
+                    No users found.
+                  </TableCell>
+                </TableRow>}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <FormDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} />
       <ConfirmDeleteDialog

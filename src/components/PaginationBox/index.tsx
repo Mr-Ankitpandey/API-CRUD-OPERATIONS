@@ -1,8 +1,10 @@
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
+  PaginationNext,
 } from "@/components/ui/pagination"
 import {
   Select,
@@ -14,9 +16,10 @@ import {
 } from "../ui/select"
 import UserContext from "@/context/context"
 import { useContext } from "react"
+import { Button } from "../ui/button"
 
 export function PaginationBox() {
-  const { usersData, noOfRows, setNoOfRows, setCurrentPage } =
+  const { usersData, noOfRows, setNoOfRows, currentPage, setCurrentPage, isSomeData } =
     useContext(UserContext)
 
   const TOTAL_PAGES = Math.ceil(usersData?.length / noOfRows)
@@ -29,11 +32,18 @@ export function PaginationBox() {
   const handlePageChange = (
     e: React.MouseEventHandler<HTMLAnchorElement> | undefined
   ) => {
-    setCurrentPage(e.target.text)
+    setCurrentPage(Number(e.target.text))
+  }
+
+  const handleNextClick = () => {
+    if (currentPage < TOTAL_PAGES) {
+      setCurrentPage((p) => p + 1)
+    }
   }
 
   return (
-    <div className="flex w-full items-center bg-gray-100 py-4">
+    <>
+    {isSomeData && <div className="flex w-full items-center bg-gray-100 py-4">
       <div className="flex-1" />
 
       <div className="flex flex-1 justify-center">
@@ -43,13 +53,26 @@ export function PaginationBox() {
               {[...Array(TOTAL_PAGES).keys()].map((pageNo) => (
                 <PaginationLink
                   key={pageNo}
-                  href="#"
-                  className="mr-2 border-black px-2 py-2"
+                  className={`mr-2 border px-2 py-2 ${
+                    Number(currentPage) === pageNo + 1
+                      ? "bg-black text-white"
+                      : ""
+                  }`}
                   onClick={handlePageChange}
                 >
                   {pageNo + 1}
                 </PaginationLink>
               ))}
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem onClick={handleNextClick}>
+              <Button
+                variant="secondary" disabled={currentPage === TOTAL_PAGES}
+              >
+                Next
+              </Button>
             </PaginationItem>
           </PaginationContent>
         </Pagination>
@@ -70,6 +93,8 @@ export function PaginationBox() {
           </SelectContent>
         </Select>
       </div>
-    </div>
+    </div>}
+    
+    </>
   )
 }
