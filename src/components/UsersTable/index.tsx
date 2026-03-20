@@ -10,14 +10,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { ConfirmDeleteDialog } from "@/components/Confirm_Delete_Dialog"
 import { FormDialog } from "@/components/Form"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import UserContext from "@/context/context"
 import type { userType } from "@/Types/types"
-import { Plus } from "lucide-react"
 import { TABLE_HEADINGS } from "@/constants/table_headings"
-import { Input } from "../ui/input"
 import { Loader } from "../Loader"
-import { Toast } from "../Toast/index"
+import usePagination from "@/hooks/usePagination"
 
 const UsersTable = () => {
   const {
@@ -27,25 +25,23 @@ const UsersTable = () => {
     setUserFormInputFieldValue,
     currentPage,
     noOfRows,
-    isOperationRunning,
-    setCurrentPage,
-    isSomeData,
-    setIsSomeData
+    // isOperationRunning,
+    formDialogOpen,
+    setFormDialogOpen,
+    setCurrentPage
   } = useContext(UserContext)
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [formDialogOpen, setFormDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<number | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-
   
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<number | null>(null)
 
-  const handleAddClick = () => {
-    setIsEdit(false)
-    setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
-    setFormDialogOpen(true)
-  }
- 
+
+  const { paginatedData} = usePagination({
+    data: usersData,
+    currentPage,
+    rowsPerPage: noOfRows,
+    setCurrentPage,
+  })
 
   const handleEdit = (user: userType) => {
     setIsEdit(true)
@@ -63,44 +59,20 @@ const UsersTable = () => {
     setUserToDelete(id)
     setDeleteDialogOpen(true)
   }
-
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm =  () => {
     if (userToDelete !== null) {
-      await deleteUser(userToDelete)
+       deleteUser(userToDelete)
     }
     setDeleteDialogOpen(false)
     setUserToDelete(null)
   }
 
-  const handleSearchChange = (e) => {
-    setIsSomeData(false)
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
-  const start = (currentPage - 1) * noOfRows
-  const end = start + noOfRows
   return (
-    <div>
-      <div className="mb-5 flex justify-between">
-        <h2 className="text-xl font-semibold">User Details</h2>
-        <Input
-          placeholder="Search..."
-          className="max-w-sm"
-          onChange={handleSearchChange}
-        />
-        <Button
-          onClick={handleAddClick}
-          className="bg-blue-500 text-white hover:bg-blue-600"
-        >
-          <Plus />
-          Add User
-        </Button>
-      </div>
-      {isOperationRunning && <Toast/> }
+    <>
       {!usersData?.length ? (
         <Loader text="Loading..." />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="h-[50%] overflow-scroll rounded-lg border border-border">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -113,64 +85,41 @@ const UsersTable = () => {
             </TableHeader>
 
             <TableBody>
-              {usersData?.length === 0 ? (
+              {paginatedData?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center">
+                  <TableCell colSpan={6} className="py-10 text-center text-2xl">
                     No users found.
                   </TableCell>
                 </TableRow>
               ) : (
-                usersData
-                  ?.filter(
-                    (user) =>
-                     {
-                      if( user.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.city
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())){
-                          setIsSomeData(true)
-                          return user
-                        }
-                     }
-                  )
-                  .slice(start, end)
-                  .map((user) => (
-                    <TableRow key={user?.id}>
-                      <TableCell className="font-medium">{user?.id}</TableCell>
-                      <TableCell>{user?.name}</TableCell>
-                      <TableCell>{user?.city}</TableCell>
-                      <TableCell>{user?.age}</TableCell>
-                      <TableCell>{user?.email}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-6">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(user)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteClick(user?.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )) 
+                paginatedData.map((user) => (
+                  <TableRow key={user?.id}>
+                    <TableCell className="font-medium">{user?.id}</TableCell>
+                    <TableCell>{user?.name}</TableCell>
+                    <TableCell>{user?.city}</TableCell>
+                    <TableCell>{user?.age}</TableCell>
+                    <TableCell>{user?.email}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-6">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteClick(user?.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
-
-               {!isSomeData &&  <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-2xl">
-                    
-                    No users found.
-                  </TableCell>
-                </TableRow>}
             </TableBody>
           </Table>
         </div>
@@ -182,7 +131,7 @@ const UsersTable = () => {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </>
   )
 }
 

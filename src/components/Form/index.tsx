@@ -1,9 +1,5 @@
 import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   Dialog,
@@ -13,6 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import UserContext from "@/context/context"
 import { useContext } from "react"
+import { toast } from "sonner"
 
 interface FormDialogProps {
   open: boolean
@@ -34,8 +31,19 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
     const age = (fd.get("age") ?? "") as string
     const email = fd.get("email") as string
 
+    if (!name.trim() || !city.trim() || !age.trim() || !email.trim()) {
+      toast.error("Please provide all user details..!")
+      return
+    }
+
     if (!isEdit) {
-      addUser({ name, city, age, email })
+      const user = {
+        name: name.trim(),
+        city: city.trim(),
+        age: age.trim(),
+        email: email.trim(),
+      }
+      addUser(user)
     } else {
       updateUser(userFormInputFieldValue)
     }
@@ -112,7 +120,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
             </Field>
             <Field
               orientation="horizontal"
-              className="sm:col-span-2 justify-end"
+              className="justify-end sm:col-span-2"
             >
               <Button type="submit" size="lg" className="">
                 {isEdit ? "Update User" : "Add User"}

@@ -1,5 +1,5 @@
 export interface userType {
-    id?: number
+    id: number
     name: string,
     age : string,
     city : string,
@@ -16,5 +16,14 @@ export interface UserContextType  {
     userFormInputFieldValue : userFormType,
     setUserFormInputFieldValue : (value: userFormType | ((prev: userFormType) => userFormType))=> void,
     isEdit : boolean,
-    setIsEdit : (val:boolean)=> void
+    setIsEdit : (val:boolean)=> void,
+    noOfRows: number,
+    setNoOfRows : (val:number)=>void,
+    currentPage : number,
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+    isOperationRunning : boolean,
+    searchQuery: string,
+    setSearchQuery : (val:string)=>void
+    formDialogOpen: boolean,
+    setFormDialogOpen : (val : boolean)=>void
 }
