@@ -59,9 +59,13 @@ const UsersTable = () => {
     setUserToDelete(id)
     setDeleteDialogOpen(true)
   }
-  const handleDeleteConfirm =  () => {
+  const handleDeleteConfirm = async () => {
     if (userToDelete !== null) {
-       deleteUser(userToDelete)
+      try {
+        await deleteUser(userToDelete)
+      } catch {
+        // toast errors are already handled in useUsers
+      }
     }
     setDeleteDialogOpen(false)
     setUserToDelete(null)

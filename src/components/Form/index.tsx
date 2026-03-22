@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,9 +24,12 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
     setUserFormInputFieldValue,
     updateUser,
     isEdit,
+    isOperationRunning,
   } = useContext(UserContext)
 
-  const handleFormAction = (fd: FormData) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const fd = new FormData(e.currentTarget)
     const name = fd.get("name") as string
     const city = fd.get("city") as string
     const age = (fd.get("age") ?? "") as string
@@ -35,21 +39,20 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
       toast.error("Please provide all user details..!")
       return
     }
-
-    if (!isEdit) {
-      const user = {
-        name: name.trim(),
-        city: city.trim(),
-        age: age.trim(),
-        email: email.trim(),
+      if (!isEdit) {
+        const user = {
+          name: name.trim(),
+          city: city.trim(),
+          age: age.trim(),
+          email: email.trim(),
+        }
+        await addUser(user) 
+      } else {
+        await updateUser(userFormInputFieldValue)
       }
-      addUser(user)
-    } else {
-      updateUser(userFormInputFieldValue)
-    }
 
-    setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
-    onOpenChange(false)
+      setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
+      onOpenChange(false)
   }
 
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,13 +64,13 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+    <Dialog open={open} onOpenChange={(val) => { if (!isOperationRunning) onOpenChange(val) }}>
+      <DialogContent className="sm:max-w-lg" onInteractOutside={(e) => { if (isOperationRunning) e.preventDefault() }}>
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit User" : "Add New User"}</DialogTitle>
         </DialogHeader>
 
-        <form className="grid gap-5 sm:grid-cols-2" action={handleFormAction}>
+        <form className="grid gap-5 sm:grid-cols-2" onSubmit={handleFormSubmit}>
           <FieldGroup className="contents">
             <Field>
               <FieldLabel htmlFor="name">Name</FieldLabel>
@@ -77,6 +80,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 placeholder="Enter name"
                 required
                 name="name"
+                disabled={isOperationRunning}
                 value={userFormInputFieldValue?.name || ""}
                 onChange={handleFieldChange}
               />
@@ -88,6 +92,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 type="text"
                 placeholder="Enter city"
                 name="city"
+                disabled={isOperationRunning}
                 value={userFormInputFieldValue?.city || ""}
                 required
                 onChange={handleFieldChange}
@@ -101,6 +106,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 placeholder="Enter age"
                 name="age"
                 min="1"
+                disabled={isOperationRunning}
                 value={userFormInputFieldValue?.age || ""}
                 required
                 onChange={handleFieldChange}
@@ -113,6 +119,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 type="text"
                 placeholder="Enter email"
                 name="email"
+                disabled={isOperationRunning}
                 value={userFormInputFieldValue?.email || ""}
                 required
                 onChange={handleFieldChange}
@@ -120,10 +127,28 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
             </Field>
             <Field
               orientation="horizontal"
-              className="justify-end sm:col-span-2"
+              className="justify-end sm:col-span-2 gap-3"
             >
-              <Button type="submit" size="lg" className="">
-                {isEdit ? "Update User" : "Add User"}
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                disabled={isOperationRunning}
+                onClick={() =>
+                  setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
+                }
+              >
+                Clear
+              </Button>
+              <Button type="submit" size="lg" disabled={isOperationRunning}>
+                {isOperationRunning ? (
+                  <>
+                    <Spinner className="size-4" />
+                    Please wait...
+                  </>
+                ) : (
+                  isEdit ? "Update User" : "Add User"
+                )}
               </Button>
             </Field>
           </FieldGroup>

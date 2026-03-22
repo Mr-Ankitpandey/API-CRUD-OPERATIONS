@@ -10,7 +10,7 @@ export type userFormType = Omit<userType, 'id'> & { id?: number }
 
 export interface UserContextType  {
     usersData : userType[]
-    addUser : (user : userType)=> void;
+    addUser : (user : userFormType)=> void;
     updateUser : (formValues: userFormType)=> void;
     deleteUser : (id: number)=> void;
     userFormInputFieldValue : userFormType,

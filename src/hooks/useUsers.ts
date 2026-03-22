@@ -21,14 +21,14 @@ const useUsers = () => {
     }
   }
 
-   const addUser = async (user: userType) => {
+   const addUser = async (user: userFormType) => {
     setIsOperationRunning(true)
     try {
       const response = await createUser(user)
       if (response.status === 201) {
         await fetchUsers()
         toast.success("User added successfully!", {
-          duration: 1200,
+          duration: 1200, 
         })
         setIsOperationRunning(false)
       }

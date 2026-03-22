@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { useContext} from "react"
@@ -23,12 +23,28 @@ const Header = () => {
     <>
       <div className="mb-5 flex justify-between">
         <h2 className="text-xl font-semibold">User Details</h2>
-        <Input
-          placeholder="Search..."
-          className="md:max-w-sm w-sm"
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
+        <div className="relative md:max-w-sm w-sm">
+          <Input
+            placeholder="Search..."
+            className="pr-9"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          {searchQuery && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSearchQuery("")
+                setCurrentPage(1)
+              }}
+              className="absolute right-1 h-7 w-7 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <Button
           onClick={handleAddClick}
           className="bg-blue-500 text-white hover:bg-blue-600"

@@ -30,7 +30,7 @@ export function PaginationBox() {
     setCurrentPage,
   })
 
-  const pages = getPages({currentPage, totalPages})
+  const pages = getPages({ currentPage, totalPages })
 
   const handleSelectChange = (value: string) => {
     setNoOfRows(Number(value))
@@ -79,7 +79,9 @@ export function PaginationBox() {
                       <PaginationItem key={page}>
                         <PaginationLink
                           className={
-                            currentPage === page ? "bg-black text-white" : ""
+                            currentPage === page
+                              ? "bg-black text-white hover:bg-gray-700 hover:text-white cursor-pointer"
+                              : "cursor-pointer"
                           }
                           onClick={() => setCurrentPage(page)}
                         >
