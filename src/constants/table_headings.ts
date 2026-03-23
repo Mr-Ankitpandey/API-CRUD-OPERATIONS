@@ -1,1 +1,0 @@
-export const TABLE_HEADINGS = ['Id', 'Name', 'City', 'Age', 'Email']

@@ -8,78 +8,50 @@ import {
 } from "@/components/ui/table"
 
 import { Button } from "@/components/ui/button"
-import { ConfirmDeleteDialog } from "@/components/Confirm_Delete_Dialog"
-import { FormDialog } from "@/components/Form"
-import { useContext, useState } from "react"
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog"
+import { FormDialog } from "@/pages/Home/components/Form"
+import { useContext } from "react"
 import UserContext from "@/context/context"
-import type { userType } from "@/Types/types"
-import { TABLE_HEADINGS } from "@/constants/table_headings"
-import { Loader } from "../Loader"
+import { TABLE_HEADINGS } from "@/constants/constants"
+import { Loader } from "../../../../components/Loader"
 import usePagination from "@/hooks/usePagination"
+import useUsersTable from "./hooks/useUsersTable"
 
 const UsersTable = () => {
   const {
     usersData,
-    deleteUser,
-    setIsEdit,
-    setUserFormInputFieldValue,
     currentPage,
     noOfRows,
-    // isOperationRunning,
     formDialogOpen,
     setFormDialogOpen,
-    setCurrentPage
+    setCurrentPage,
+    isLoading
   } = useContext(UserContext)
 
-  
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<number | null>(null)
-
-
-  const { paginatedData} = usePagination({
+  const { paginatedData } = usePagination({
     data: usersData,
     currentPage,
     rowsPerPage: noOfRows,
     setCurrentPage,
   })
 
-  const handleEdit = (user: userType) => {
-    setIsEdit(true)
-    setUserFormInputFieldValue({
-      id: user.id,
-      name: user.name,
-      city: user.city,
-      age: user.age,
-      email: user.email,
-    })
-    setFormDialogOpen(true)
-  }
-
-  const handleDeleteClick = (id: number) => {
-    setUserToDelete(id)
-    setDeleteDialogOpen(true)
-  }
-  const handleDeleteConfirm = async () => {
-    if (userToDelete !== null) {
-      try {
-        await deleteUser(userToDelete)
-      } catch {
-        // toast errors are already handled in useUsers
-      }
-    }
-    setDeleteDialogOpen(false)
-    setUserToDelete(null)
-  }
+  const {
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    handleEdit,
+    handleDeleteClick,
+    handleDeleteConfirm,
+  } = useUsersTable()
 
   return (
     <>
-      {!usersData?.length ? (
+      {isLoading? (
         <Loader text="Loading..." />
       ) : (
-        <div className="h-[50%] overflow-scroll rounded-lg border border-border">
-          <Table>
+        <div  >
+          <Table >
             <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableRow >
                 {TABLE_HEADINGS?.map((heading) => (
                   <TableHead key={heading} className="text-[16px] font-bold">
                     {heading}
@@ -96,7 +68,7 @@ const UsersTable = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((user) => (
+                paginatedData?.map((user) => (
                   <TableRow key={user?.id}>
                     <TableCell className="font-medium">{user?.id}</TableCell>
                     <TableCell>{user?.name}</TableCell>

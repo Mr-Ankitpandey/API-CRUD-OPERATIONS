@@ -22,14 +22,14 @@ const usePagination = ({
   const filteredUsers = useMemo(() => {
     if (!debouncedSearch) return data
 
-    return data.filter(
+    return data?.filter(
       (user) =>
-        user.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        user.city.toLowerCase().includes(debouncedSearch.toLowerCase())
+        user?.name?.toLowerCase().includes(debouncedSearch?.toLowerCase()) ||
+        user?.city?.toLowerCase().includes(debouncedSearch?.toLowerCase())
     )
   }, [data, debouncedSearch])
 
-  const totalPages =  Math.ceil(filteredUsers.length / rowsPerPage)
+  const totalPages =  Math.ceil(filteredUsers?.length / rowsPerPage)
   
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -39,7 +39,7 @@ const usePagination = ({
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage
-    return filteredUsers.slice(start, start + rowsPerPage)
+    return filteredUsers?.slice(start, start + rowsPerPage)
   }, [filteredUsers, currentPage, rowsPerPage])
 
   return {
@@ -49,3 +49,4 @@ const usePagination = ({
 }
 
 export default usePagination
+

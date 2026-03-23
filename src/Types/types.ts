@@ -19,6 +19,7 @@ export interface UserContextType  {
     setIsEdit : (val:boolean)=> void,
     noOfRows: number,
     setNoOfRows : (val:number)=>void,
+    isLoading : boolean
     currentPage : number,
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>
     isOperationRunning : boolean,

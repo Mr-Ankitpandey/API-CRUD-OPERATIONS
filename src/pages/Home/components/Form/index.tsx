@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import UserContext from "@/context/context"
 import { useContext } from "react"
-import { toast } from "sonner"
+import useForm from "./hooks/useForm"
 
 interface FormDialogProps {
   open: boolean
@@ -19,53 +19,28 @@ interface FormDialogProps {
 
 export function FormDialog({ open, onOpenChange }: FormDialogProps) {
   const {
-    addUser,
     userFormInputFieldValue,
-    setUserFormInputFieldValue,
-    updateUser,
     isEdit,
     isOperationRunning,
+    setFormDialogOpen,
   } = useContext(UserContext)
 
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    const name = fd.get("name") as string
-    const city = fd.get("city") as string
-    const age = (fd.get("age") ?? "") as string
-    const email = fd.get("email") as string
-
-    if (!name.trim() || !city.trim() || !age.trim() || !email.trim()) {
-      toast.error("Please provide all user details..!")
-      return
-    }
-      if (!isEdit) {
-        const user = {
-          name: name.trim(),
-          city: city.trim(),
-          age: age.trim(),
-          email: email.trim(),
-        }
-        await addUser(user) 
-      } else {
-        await updateUser(userFormInputFieldValue)
-      }
-
-      setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
-      onOpenChange(false)
-  }
-
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setUserFormInputFieldValue((prevValues) => ({
-      ...prevValues,
-      [name]: name === "age" ? Number(value) : value,
-    }))
-  }
+  const { handleFormSubmit, handleInputChange } = useForm(onOpenChange)
 
   return (
-    <Dialog open={open} onOpenChange={(val) => { if (!isOperationRunning) onOpenChange(val) }}>
-      <DialogContent className="sm:max-w-lg" onInteractOutside={(e) => { if (isOperationRunning) e.preventDefault() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        if (!isOperationRunning) onOpenChange(val)
+      }}
+    >
+      <DialogContent
+        className="sm:max-w-lg"
+        onInteractOutside={(e) => {
+          if (isOperationRunning) e.preventDefault()
+        }}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit User" : "Add New User"}</DialogTitle>
         </DialogHeader>
@@ -82,7 +57,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 name="name"
                 disabled={isOperationRunning}
                 value={userFormInputFieldValue?.name || ""}
-                onChange={handleFieldChange}
+                onChange={handleInputChange}
               />
             </Field>
             <Field>
@@ -95,7 +70,7 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 disabled={isOperationRunning}
                 value={userFormInputFieldValue?.city || ""}
                 required
-                onChange={handleFieldChange}
+                onChange={handleInputChange}
               />
             </Field>
             <Field>
@@ -109,36 +84,32 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                 disabled={isOperationRunning}
                 value={userFormInputFieldValue?.age || ""}
                 required
-                onChange={handleFieldChange}
+                onChange={handleInputChange}
               />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                type="text"
+                type="email"
                 placeholder="Enter email"
                 name="email"
                 disabled={isOperationRunning}
                 value={userFormInputFieldValue?.email || ""}
                 required
-                onChange={handleFieldChange}
+                onChange={handleInputChange}
               />
             </Field>
             <Field
               orientation="horizontal"
-              className="justify-end sm:col-span-2 gap-3"
+              className="justify-end gap-3 sm:col-span-2"
             >
               <Button
                 type="button"
-                size="lg"
                 variant="outline"
-                disabled={isOperationRunning}
-                onClick={() =>
-                  setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
-                }
+                onClick={() => setFormDialogOpen(false)}
               >
-                Clear
+                Cancel
               </Button>
               <Button type="submit" size="lg" disabled={isOperationRunning}>
                 {isOperationRunning ? (
@@ -146,8 +117,10 @@ export function FormDialog({ open, onOpenChange }: FormDialogProps) {
                     <Spinner className="size-4" />
                     Please wait...
                   </>
+                ) : isEdit ? (
+                  "Update User"
                 ) : (
-                  isEdit ? "Update User" : "Add User"
+                  "Add User"
                 )}
               </Button>
             </Field>

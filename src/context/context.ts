@@ -13,6 +13,7 @@ const UserContext = createContext<UserContextType>({
     noOfRows: 0,
     setNoOfRows: () => { },
     currentPage: 0,
+    isLoading : true,
     setCurrentPage: () => { },
     isOperationRunning: false,
     searchQuery: "",

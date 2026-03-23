@@ -1,16 +1,17 @@
 import { Plus, X } from "lucide-react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
 import { useContext} from "react"
 import UserContext from "@/context/context"
+import { INITIAL_FORM_VALUES } from "@/constants/constants"
 
-const Header = () => {
+const UsersToolbar = () => {
   const { setCurrentPage, setUserFormInputFieldValue, setIsEdit,searchQuery, setSearchQuery, setFormDialogOpen} =
     useContext(UserContext)
 
   const handleAddClick = () => {
     setIsEdit(false)
-    setUserFormInputFieldValue({ name: "", city: "", age: "", email: "" })
+    setUserFormInputFieldValue(INITIAL_FORM_VALUES)
     setFormDialogOpen(true)
   }
 
@@ -59,4 +60,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default UsersToolbar

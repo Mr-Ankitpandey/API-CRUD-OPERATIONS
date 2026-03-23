@@ -17,10 +17,10 @@ import UserContext from "@/context/context"
 import { useContext } from "react"
 import { Button } from "../ui/button"
 import usePagination from "@/hooks/usePagination"
-import { getPages } from "./utils/getPages"
+import usePage from "./hooks/usePage"
 
 export function PaginationBox() {
-  const { noOfRows, setNoOfRows, currentPage, setCurrentPage, usersData } =
+  const { noOfRows, currentPage, setCurrentPage, usersData } =
     useContext(UserContext)
 
   const { totalPages } = usePagination({
@@ -30,24 +30,11 @@ export function PaginationBox() {
     setCurrentPage,
   })
 
-  const pages = getPages({ currentPage, totalPages })
+  const {getPages, handleNextClick, handlePreviousClick, handleSelectChange} = usePage({ currentPage, totalPages })
+  const pages = getPages()
 
-  const handleSelectChange = (value: string) => {
-    setNoOfRows(Number(value))
-    setCurrentPage(1)
-  }
 
-  const handleNextClick = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(p => p + 1)
-    }
-  }
-
-  const handlePreviousClick = () => {
-    if (currentPage > 1) {
-      setCurrentPage(p => p - 1)
-    }
-  }
+ 
   return (
     <>
       {totalPages > 0 && (
@@ -66,9 +53,9 @@ export function PaginationBox() {
                     Previous
                   </Button>
                 </PaginationItem>
-                <PaginationItem className="flex">
-                  {pages.map((page) => {
-                    if (page === "ellipsis") {
+                <div className="flex">
+                  {pages?.map((page) => {
+                    if (page === "...") {
                       return (
                         <PaginationItem key={page}>
                           <PaginationEllipsis />
@@ -90,7 +77,7 @@ export function PaginationBox() {
                       </PaginationItem>
                     )
                   })}
-                </PaginationItem>
+                </div>
                 <PaginationItem onClick={handleNextClick}>
                   <Button
                     variant="secondary"
