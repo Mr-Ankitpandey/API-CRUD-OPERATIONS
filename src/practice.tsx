@@ -1,6 +1,6 @@
 const practice = () => {
   const logUser = () => {
-    console.log('logging user');
+    console.log('logging user from developer 2');
   };
   logUser();
   return (
